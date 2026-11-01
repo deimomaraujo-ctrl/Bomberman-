@@ -1,1 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bomberman Retrô Deluxe</title>
+  
+  <!-- Configurações PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1157/1157109.png">
 
+  <style>
+    * {
+      box-sizing: border-box;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    #game-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+    }
+    #hud {
+      display: flex;
+      justify-content: space-between;
+      width: 95%;
+      padding: 8px 15px;
+      background: #222;
+      border: 2px solid #555;
+      border-radius: 8px 8px 0 0;
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffd700;
+    }
+    canvas {
+      background: #388e3c;
+      border: 3px solid #555;
+      max-width: 95%;
+      height: auto;
+      image-rendering: pixelated;
+    }
+    #install-btn {
+      display: none;
+      position: absolute;
+      top: 10px;
+      z-index: 100;
+      background: #ffeb3b;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    /* Controles Mobile */
+    #touch-controls {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 95%;
+      margin-top: 10px;
+    }
+    .dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 52px);
+      grid-template-rows: repeat(3, 52px);
+      gap: 4px;
+    }
+    .btn {
+      background: #333;
+      border: 2px solid #777;
+      border-radius: 10px;
+      color: white;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .btn:active {
+      background: #666;
+    }
+    .btn-bomb {
+      width: 95px;
+      height: 95px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #e53935, #b71c1c);
+      border: 3px solid #fff;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      box-shadow: 0 4px #7f0000;
+    }
+    .btn-bomb:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px #7f0000;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="install-btn">📲 Instalar Aplicativo</button>
+
+  <div id="game-container">
+    <div id="hud">
+      <div>VIDAS: <span id="ui-lives">3</span></div>
+      <div>FASE: <span id="ui-level">1</span></div>
+      <div>MONSTROS: <span id="ui-enemies">0</span></div>
+    </div>
+    
+    <canvas id="canvas" width="520" height="440"></canvas>
+
+    <!-- Controles de Toque para Mobile -->
+    <div id="touch-controls">
+      <div class="dpad">
+        <div></div>
+        <button class="btn" id="ctrl-up">▲</button>
+        <div></div>
+        <button class="btn" id="ctrl-left">◄</button>
+        <div></div>
+        <button class="btn" id="ctrl-right">►</button>
+        <div></div>
+        <button class="btn" id="ctrl-down">▼</button>
+        <div></div>
+      </div>
+      <button class="btn-bomb" id="ctrl-bomb">💣 BOMB</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // SISTEMA PWA & INSTALAÇÃO
+    // ==========================================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+      });
+    }
+
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-btn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      }
+    });
+
+    // ==========================================
+    // MOTOR DE ÁUDIO RETRÔ (Sintetizador 8-Bit)
+    // ==========================================
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'plant') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(220, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'explosion') {
+        // Ruído branco aproximado para explosão
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.4);
+        gain.gain.setValueAtTime(0.8, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+        if (navigator.vibrate) navigator.vibrate(120);
+      } else if (type === 'powerup') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(330, now);
+        osc.frequency.setValueAtTime(440, now + 0.08);
+        osc.frequency.setValueAtTime(587, now + 0.16);
+        osc.frequency.setValueAtTime(880, now + 0.24);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'die') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.linearRampToValueAtTime(80, now + 0.5);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }
+    }
+
+    // ==========================================
+    // LÓGICA DO JOGO BOMBERMAN
+    // ==========================================
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const TILE = 40;
+    const COLS = 13;
+    const ROWS = 11;
+
+    // Tipos de Blocos
+    const EMPTY = 0;
+    const WALL = 1;     // Inquebrável
+    const BRICK = 2;    // Destrutível
+
+    // Tipos de Power-ups
+    const ITEM_NONE = 0;
+    const ITEM_BOMB = 1;  // +1 Bomba
+    const ITEM_FIRE = 2;  // +1 Raio de Fogo
+
+    let level = 1;
+    let grid = [];
+    let items = [];
+    let bombs = [];
+    let explosions = [];
+    let enemies = [];
+
+    let player = {
+      x: 1,
+      y: 1,
+      lives: 3,
+      maxBombs: 1,
+      fireRange: 1,
+      alive: true
+    };
+
+    function startLevel() {
+      grid = [];
+      items = [];
+      bombs = [];
+      explosions = [];
+      enemies = [];
+
+      player.x = 1;
+      player.y = 1;
+      player.alive = true;
+
+      // Gerar Labirinto Clássico
+      for (let r = 0; r < ROWS; r++) {
+        grid[r] = [];
+        for (let c = 0; c < COLS; c++) {
+          if (r === 0 || r === ROWS - 1 || c === 0 || c === COLS - 1 || (r % 2 === 0 && c % 2 === 0)) {
+            grid[r][c] = WALL;
+          } else if ((r <= 2 && c <= 2)) {
+            grid[r][c] = EMPTY; // Área segura inicial
+          } else {
+            if (Math.random() < 0.45) {
+              grid[r][c] = BRICK;
+              // Sorteia itens dentro dos tijolos
+              let rand = Math.random();
+              if (rand < 0.15) items.push({ x: c, y: r, type: ITEM_BOMB });
+              else if (rand < 0.3) items.push({ x: c, y: r, type: ITEM_FIRE });
+            } else {
+              grid[r][c] = EMPTY;
+            }
+          }
+        }
+      }
+
+      // Criar Inimigos de acordo com o nível
+      let enemyTotal = 2 + level;
+      while (enemies.length < enemyTotal) {
+        let rc = Math.floor(Math.random() * (ROWS - 2)) + 1;
+        let cc = Math.floor(Math.random() * (COLS - 2)) + 1;
+        if (grid[rc][cc] === EMPTY && (rc > 3 || cc > 3)) {
+          enemies.push({ x: cc, y: rc, moveTick: 0 });
+        }
+      }
+
+      updateHUD();
+    }
+
+    function updateHUD() {
+      document.getElementById('ui-lives').innerText = player.lives;
+      document.getElementById('ui-level').innerText = level;
+      document.getElementById('ui-enemies').innerText = enemies.length;
+    }
+
+    function movePlayer(dx, dy) {
+      if (!player.alive) return;
+      let nx = player.x + dx;
+      let ny = player.y + dy;
+
+      if (grid[ny][nx] === EMPTY && !bombs.some(b => b.x === nx && b.y === ny)) {
+        player.x = nx;
+        player.y = ny;
+
+        // Coletar Power-ups
+        for (let i = items.length - 1; i >= 0; i--) {
+          if (items[i].x === nx && items[i].y === ny && grid[ny][nx] === EMPTY) {
+            if (items[i].type === ITEM_BOMB) player.maxBombs++;
+            if (items[i].type === ITEM_FIRE) player.fireRange++;
+            playSound('powerup');
+            items.splice(i, 1);
+          }
+        }
+      }
+    }
+
+    function dropBomb() {
+      if (!player.alive) return;
+      let currentBombs = bombs.filter(b => b.owner === 'player').length;
+      if (currentBombs >= player.maxBombs) return;
+
+      if (!bombs.some(b => b.x === player.x && b.y === player.y)) {
+        bombs.push({
+          x: player.x,
+          y: player.y,
+          timer: 160,
+          range: player.fireRange,
+          owner: 'player'
+        });
+        playSound('plant');
+      }
+    }
+
+    function triggerExplosion(bomb) {
+      playSound('explosion');
+      let tiles = [{ x: bomb.x, y: bomb.y }];
+      const directions = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}];
+
+      directions.forEach(dir => {
+        for (let step = 1; step <= bomb.range; step++) {
+          let tx = bomb.x + dir.x * step;
+          let ty = bomb.y + dir.y * step;
+
+          if (grid[ty][tx] === WALL) break;
+
+          tiles.push({ x: tx, y: ty });
+
+          if (grid[ty][tx] === BRICK) {
+            grid[ty][tx] = EMPTY;
+            break; // A explosão para ao destruir um bloco
+          }
+
+          // Detona outras bombas em cadeia
+          let otherBomb = bombs.find(b => b.x === tx && b.y === ty);
+          if (otherBomb) otherBomb.timer = 0;
+        }
+      });
+
+      explosions.push({ tiles: tiles, timer: 25 });
+    }
+
+    function killPlayer() {
+      if (!player.alive) return;
+      player.alive = false;
+      playSound('die');
+      player.lives--;
+      updateHUD();
+
+      setTimeout(() => {
+        if (player.lives > 0) {
+          player.x = 1;
+          player.y = 1;
+          player.alive = true;
+        } else {
+          alert('GAME OVER! Reiniciando jogo...');
+          level = 1;
+          player.lives = 3;
+          player.maxBombs = 1;
+          player.fireRange = 1;
+          startLevel();
+        }
+      }, 800);
+    }
+
+    // ==========================================
+    // LOOP PRINCIPAL & ATUALIZAÇÕES
+    // ==========================================
+    function update() {
+      // 1. Processar Bombas
+      for (let i = bombs.length - 1; i >= 0; i--) {
+        bombs[i].timer--;
+        if (bombs[i].timer <= 0) {
+          triggerExplosion(bombs[i]);
+          bombs.splice(i, 1);
+        }
+      }
+
+      // 2. Processar Explosões
+      for (let i = explosions.length - 1; i >= 0; i--) {
+        explosions[i].timer--;
+        let exp = explosions[i];
+
+        exp.tiles.forEach(t => {
+          // Atingiu Jogador
+          if (player.alive && player.x === t.x && player.y === t.y) {
+            killPlayer();
+          }
+          // Atingiu Inimigos
+          for (let eIndex = enemies.length - 1; eIndex >= 0; eIndex--) {
+            if (enemies[eIndex].x === t.x && enemies[eIndex].y === t.y) {
+              enemies.splice(eIndex, 1);
+              updateHUD();
+            }
+          }
+          // Destrói itens atingidos por fogo
+          items = items.filter(it => !(it.x === t.x && it.y === t.y));
+        });
+
+        if (exp.timer <= 0) explosions.splice(i, 1);
+      }
+
+      // 3. Inteligência dos Inimigos
+      enemies.forEach(en => {
+        en.moveTick++;
+        if (en.moveTick % 32 === 0) {
+          const dirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}];
+          let validMoves = dirs.filter(d => {
+            let nx = en.x + d.x;
+            let ny = en.y + d.y;
+            return grid[ny] && grid[ny][nx] === EMPTY && !bombs.some(b => b.x === nx && b.y === ny);
+          });
+
+          if (validMoves.length > 0) {
+            let chosen = validMoves[Math.floor(Math.random() * validMoves.length)];
+            en.x += chosen.x;
+            en.y += chosen.y;
+          }
+        }
+
+        // Colisão Inimigo com Jogador
+        if (player.alive && en.x === player.x && en.y === player.y) {
+          killPlayer();
+        }
+      });
+
+      // 4. Checar Próxima Fase
+      if (enemies.length === 0 && player.alive) {
+        level++;
+        alert(`Fase Concluída! Bem-vindo à Fase ${level}!`);
+        startLevel();
+      }
+    }
+
+    // ==========================================
+    // RENDERIZAÇÃO GRÁFICA (Canvas)
+    // ==========================================
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Desenhar Tabuleiro
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (grid[r][c] === WALL) {
+            ctx.fillStyle = '#424242';
+            ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
+            ctx.strokeStyle = '#212121';
+            ctx.strokeRect(c * TILE + 2, r * TILE + 2, TILE - 4, TILE - 4);
+          } else if (grid[r][c] === BRICK) {
+            ctx.fillStyle = '#b0bec5';
+            ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
+            ctx.fillStyle = '#78909c';
+            ctx.fillRect(c * TILE + 4, r * TILE + 4, TILE - 8, TILE - 8);
+          }
+        }
+      }
+
+      // Power-ups revelados
+      items.forEach(it => {
+        if (grid[it.y][it.x] === EMPTY) {
+          ctx.font = '22px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(it.type === ITEM_BOMB ? '💣' : '🔥', it.x * TILE + TILE/2, it.y * TILE + TILE/2);
+        }
+      });
+
+      // Bombas
+      bombs.forEach(b => {
+        let pulse = Math.sin(Date.now() / 80) * 3;
+        ctx.fillStyle = '#111';
+        ctx.beginPath();
+        ctx.arc(b.x * TILE + TILE/2, b.y * TILE + TILE/2, (TILE/2.5) + pulse/2, 0, Math.PI * 2);
+        ctx.fill();
+        // Pavio
+        ctx.fillStyle = '#ff5722';
+        ctx.fillRect(b.x * TILE + TILE/2 - 2, b.y * TILE + 4, 4, 6);
+      });
+
+      // Fogo / Explosões
+      ctx.fillStyle = 'rgba(255, 69, 0, 0.85)';
+      explosions.forEach(exp => {
+        exp.tiles.forEach(t => {
+          ctx.fillRect(t.x * TILE, t.y * TILE, TILE, TILE);
+        });
+      });
+
+      // Inimigos
+      enemies.forEach(en => {
+        ctx.fillStyle = '#d81b60';
+        ctx.beginPath();
+        ctx.arc(en.x * TILE + TILE/2, en.y * TILE + TILE/2, TILE/2.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(en.x * TILE + 10, en.y * TILE + 12, 5, 5);
+        ctx.fillRect(en.x * TILE + 25, en.y * TILE + 12, 5, 5);
+      });
+
+      // Jogador (Bomberman)
+      if (player.alive) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(player.x * TILE + 8, player.y * TILE + 8, TILE - 16, TILE - 16);
+        ctx.fillStyle = '#1976d2';
+        ctx.fillRect(player.x * TILE + 12, player.y * TILE + 2, TILE - 24, 10);
+      }
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // ==========================================
+    // CONTROLES DE ENTRADA (Teclado e Toque)
+    // ==========================================
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowUp' || e.key === 'w') movePlayer(0, -1);
+      if (e.key === 'ArrowDown' || e.key === 's') movePlayer(0, 1);
+      if (e.key === 'ArrowLeft' || e.key === 'a') movePlayer(-1, 0);
+      if (e.key === 'ArrowRight' || e.key === 'd') movePlayer(1, 0);
+      if (e.key === ' ' || e.key === 'Enter') dropBomb();
+    });
+
+    const bindTouch = (id, action) => {
+      const el = document.getElementById(id);
+      el.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        action();
+      }, { passive: false });
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        action();
+      });
+    };
+
+    bindTouch('ctrl-up', () => movePlayer(0, -1));
+    bindTouch('ctrl-down', () => movePlayer(0, 1));
+    bindTouch('ctrl-left', () => movePlayer(-1, 0));
+    bindTouch('ctrl-right', () => movePlayer(1, 0));
+    bindTouch('ctrl-bomb', () => dropBomb());
+
+    // Iniciar jogo
+    startLevel();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>
