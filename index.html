@@ -2,28 +2,22 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Bomberman 300 Fases - Edição Completa</title>
-  
-  <!-- Configurações PWA (Instalação pelo Navegador) -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1b5e20">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Super Bomberman 5 - 300 Fases</title>
 
   <style>
     * {
       box-sizing: border-box;
-      touch-action: manipulation;
+      margin: 0;
+      padding: 0;
       user-select: none;
       -webkit-user-select: none;
     }
+
     body {
-      margin: 0;
-      padding: 0;
-      background: #0d0d0d;
-      color: #fff;
-      font-family: 'Courier New', Courier, monospace;
+      background-color: #0d1117;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -31,679 +25,770 @@
       min-height: 100vh;
       overflow: hidden;
     }
+
+    /* CONTAINER PRINCIPAL DO JOGO */
     #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 100%;
-      max-width: 560px;
+      background: #161b22;
+      border: 3px solid #30363d;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     }
+
+    /* BARRA SUPERIOR DE STATUS */
     #hud {
+      width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      width: 96%;
+      background: #21262d;
       padding: 8px 12px;
-      background: #1e1e1e;
-      border: 3px solid #444;
-      border-radius: 8px 8px 0 0;
-      font-size: 13px;
+      border-radius: 8px;
+      margin-bottom: 8px;
       font-weight: bold;
-      color: #ffeb3b;
+      font-size: 0.85rem;
     }
-    .hud-btn {
-      background: #333;
-      border: 1px solid #777;
-      color: white;
-      padding: 3px 6px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 11px;
+
+    .hud-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
+
+    .hud-val {
+      color: #58a6ff;
+    }
+
+    /* CANVAS DO JOGO */
     canvas {
-      background: #2e7d32;
-      border: 3px solid #444;
-      max-width: 96%;
+      background: #000;
+      border-radius: 6px;
+      display: block;
+      width: 100%;
+      height: auto;
       image-rendering: pixelated;
     }
-    /* Controles Virtuais Touch */
+
+    /* CONTROLES TOUCH PARA CELULAR */
     #touch-controls {
+      width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      width: 95%;
-      margin-top: 8px;
+      margin-top: 12px;
+      padding: 0 10px;
     }
+
     .dpad {
       display: grid;
-      grid-template-columns: repeat(3, 50px);
-      grid-template-rows: repeat(3, 50px);
+      grid-template-columns: repeat(3, 45px);
+      grid-template-rows: repeat(3, 45px);
       gap: 3px;
     }
-    .btn {
-      background: #2a2a2a;
-      border: 2px solid #666;
-      border-radius: 10px;
+
+    .dbtn {
+      background: #30363d;
+      border: 2px solid #8b949e;
+      border-radius: 8px;
       color: white;
-      font-size: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px #111;
+      touch-action: manipulation;
     }
-    .btn:active {
-      background: #555;
-      transform: translateY(2px);
-      box-shadow: 0 2px #111;
+
+    .dbtn:active {
+      background: #58a6ff;
     }
-    .btn-bomb {
-      width: 90px;
-      height: 90px;
+
+    #btn-up { grid-column: 2; grid-row: 1; }
+    #btn-left { grid-column: 1; grid-row: 2; }
+    #btn-right { grid-column: 3; grid-row: 2; }
+    #btn-down { grid-column: 2; grid-row: 3; }
+
+    .bomb-btn-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #btn-bomb {
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      background: radial-gradient(circle, #e53935, #8e0000);
-      border: 3px solid #ffcdd2;
-      font-size: 16px;
-      font-weight: bold;
+      background: #da3633;
+      border: 4px solid #f85149;
       color: white;
-      box-shadow: 0 5px #4a0000;
+      font-size: 1rem;
+      font-weight: 900;
+      box-shadow: 0 4px 12px rgba(218, 54, 51, 0.5);
+      touch-action: manipulation;
     }
-    .btn-bomb:active {
-      transform: translateY(3px);
-      box-shadow: 0 2px #4a0000;
+
+    #btn-bomb:active {
+      transform: scale(0.95);
+      background: #b62324;
     }
-    #install-banner {
-      display: none;
+
+    /* TELA DE OVERLAY / MENU DE SELEÇÃO DE FASES */
+    .overlay-screen {
       position: absolute;
-      top: 5px;
-      background: #ff9800;
-      color: #000;
-      padding: 6px 15px;
-      border-radius: 20px;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(13, 17, 23, 0.95);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10;
+    }
+
+    .overlay-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #f0883e;
+      margin-bottom: 8px;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .overlay-sub {
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .btn-main {
+      background: #238636;
+      border: 2px solid #2ea043;
+      color: white;
+      font-size: 1rem;
       font-weight: bold;
-      font-size: 12px;
-      z-index: 99;
-      border: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      padding: 10px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(35, 134, 54, 0.4);
+      margin-top: 8px;
+    }
+
+    .btn-main:active {
+      transform: scale(0.96);
+    }
+
+    .stage-selector-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .stage-input-num {
+      width: 80px;
+      background: #21262d;
+      border: 2px solid #30363d;
+      color: #58a6ff;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 6px;
+      padding: 4px;
+    }
+
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
 <body>
 
-  <button id="install-banner">📲 Instalar App no Celular</button>
-
   <div id="game-container">
+    <!-- HUD DE INFORMAÇÕES DO JOGO -->
     <div id="hud">
-      <span>FASE: <span id="ui-stage">1</span>/300</span>
-      <span>TEMPO: <span id="ui-time">200</span></span>
-      <span>VIDAS: <span id="ui-lives">3</span></span>
-      <button class="hud-btn" id="btn-select-stage">Pular Fase</button>
+      <div class="hud-item">FASE: <span class="hud-val" id="hud-stage">1</span>/300</div>
+      <div class="hud-item">VIDAS: <span class="hud-val" id="hud-lives">❤️ 3</span></div>
+      <div class="hud-item">BOMBAS: <span class="hud-val" id="hud-bombs">💣 1</span></div>
     </div>
 
-    <canvas id="canvas" width="520" height="440"></canvas>
+    <!-- CANVAS DO BOMBERMAN -->
+    <canvas id="gameCanvas" width="390" height="390"></canvas>
 
+    <!-- CONTROLES VIRTUAIS TOUCH -->
     <div id="touch-controls">
       <div class="dpad">
-        <div></div>
-        <button class="btn" id="btn-up">▲</button>
-        <div></div>
-        <button class="btn" id="btn-left">◄</button>
-        <div></div>
-        <button class="btn" id="btn-right">►</button>
-        <div></div>
-        <button class="btn" id="btn-down">▼</button>
-        <div></div>
+        <button class="dbtn" id="btn-up">▲</button>
+        <button class="dbtn" id="btn-left">◄</button>
+        <button class="dbtn" id="btn-right">►</button>
+        <button class="dbtn" id="btn-down">▼</button>
       </div>
-      <button class="btn-bomb" id="btn-bomb">💣 BOMB</button>
+
+      <div class="bomb-btn-box">
+        <button id="btn-bomb">BOMBA</button>
+      </div>
+    </div>
+
+    <!-- MENU INICIAL / OVERLAY DE DERROTA/VITÓRIA -->
+    <div id="overlay" class="overlay-screen">
+      <div class="overlay-title" id="ov-title">SUPER BOMBERMAN 5</div>
+      <div class="overlay-sub" id="ov-sub">300 FASES PROCEDURAIS</div>
+
+      <div class="stage-selector-container" id="stage-select-box">
+        <label for="stageInput" style="font-size: 0.85rem;">Escolher Fase:</label>
+        <input type="number" id="stageInput" class="stage-input-num" min="1" max="300" value="1">
+      </div>
+
+      <button class="btn-main" id="btn-start" onclick="startGame()">JOGAR AGORA</button>
     </div>
   </div>
 
   <script>
-    // ==========================================================
-    // REGISTRO PWA & INSTALAÇÃO
-    // ==========================================================
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
-    let deferredPrompt;
-    const installBanner = document.getElementById('install-banner');
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBanner.style.display = 'block';
-    });
-    installBanner.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt = null;
-        installBanner.style.display = 'none';
-      }
-    });
-
-    // ==========================================================
-    // SISTEMA DE ÁUDIO SINTETIZADO (8-BIT RETRÔ)
-    // ==========================================================
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function sfx(name) {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      const t = audioCtx.currentTime;
-
-      if (name === 'plant') {
-        osc.frequency.setValueAtTime(300, t);
-        osc.frequency.exponentialRampToValueAtTime(150, t + 0.1);
-        gain.gain.setValueAtTime(0.3, t);
-        gain.gain.linearRampToValueAtTime(0.01, t + 0.1);
-        osc.start(t);
-        osc.stop(t + 0.1);
-      } else if (name === 'boom') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(120, t);
-        osc.frequency.exponentialRampToValueAtTime(25, t + 0.35);
-        gain.gain.setValueAtTime(0.7, t);
-        gain.gain.linearRampToValueAtTime(0.01, t + 0.35);
-        osc.start(t);
-        osc.stop(t + 0.35);
-        if (navigator.vibrate) navigator.vibrate(100);
-      } else if (name === 'item') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(400, t);
-        osc.frequency.setValueAtTime(600, t + 0.08);
-        osc.frequency.setValueAtTime(800, t + 0.16);
-        gain.gain.setValueAtTime(0.3, t);
-        gain.gain.linearRampToValueAtTime(0.01, t + 0.25);
-        osc.start(t);
-        osc.stop(t + 0.25);
-      } else if (name === 'die') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(500, t);
-        osc.frequency.linearRampToValueAtTime(50, t + 0.6);
-        gain.gain.setValueAtTime(0.5, t);
-        gain.gain.linearRampToValueAtTime(0.01, t + 0.6);
-        osc.start(t);
-        osc.stop(t + 0.6);
-      } else if (name === 'win') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(523, t);
-        osc.frequency.setValueAtTime(659, t + 0.12);
-        osc.frequency.setValueAtTime(783, t + 0.24);
-        osc.frequency.setValueAtTime(1046, t + 0.36);
-        gain.gain.setValueAtTime(0.3, t);
-        gain.gain.linearRampToValueAtTime(0.01, t + 0.6);
-        osc.start(t);
-        osc.stop(t + 0.6);
-      }
-    }
-
-    // ==========================================================
-    // CONFIGURAÇÕES DA ENGINE DO JOGO
-    // ==========================================================
-    const canvas = document.getElementById('canvas');
+    /* ===================================================
+       1. CONFIGURAÇÕES BASE E VARIÁVEIS DO JOGO
+       =================================================== */
+    const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    const TILE = 40;
-    const COLS = 13;
-    const ROWS = 11;
+    const GRID_SIZE = 13;
+    const TILE_SIZE = 30; // 13 * 30 = 390px
+    const TOTAL_STAGES = 300;
 
-    const EMPTY = 0;
-    const WALL = 1;
-    const BRICK = 2;
+    // TIPOS DE BLOCOS NO MAPA
+    const T_EMPTY = 0;
+    const T_HARD = 1;  // Inquebrável
+    const T_SOFT = 2;  // Destruível
+    const T_EXIT = 3;  // Portal de Saída
 
-    let currentStage = parseInt(localStorage.getItem('bomberman_stage')) || 1;
-    let unlockedStage = parseInt(localStorage.getItem('bomberman_unlocked')) || 1;
+    let stage = 1;
+    let lives = 3;
+    let maxUnlockedStage = 1;
+    let gameLoopId = null;
+    let gameState = 'MENU'; // 'MENU', 'PLAYING', 'GAMEOVER', 'STAGE_CLEAR'
+
+    // ESTADO DO JOGADOR
+    let player = {
+      x: 1,
+      y: 1,
+      speed: 0.08,
+      maxBombs: 1,
+      activeBombs: 0,
+      fireRange: 1,
+      moving: { up: false, down: false, left: false, right: false }
+    };
 
     let map = [];
     let bombs = [];
     let explosions = [];
     let enemies = [];
     let powerups = [];
-    let exitDoor = null;
-    let stageTimer = 200;
-    let timerInterval = null;
 
-    let player = {
-      x: 1,
-      y: 1,
-      lives: 3,
-      maxBombs: 1,
-      fireRange: 1,
-      speed: 1,
-      alive: true
-    };
+    /* ===================================================
+       2. EFEITOS SONOROS (WEB AUDIO API SINTETIZADO)
+       =================================================== */
+    let audioCtx = null;
 
-    // Gerador Pseudo-Aleatório para reproduzir rigorosamente as 300 Fases
-    function getStageRNG(stage) {
-      let seed = stage * 1337 + 42;
-      return function() {
-        seed = (seed * 9301 + 49297) % 233280;
-        return seed / 233280;
-      };
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
     }
 
-    // ==========================================================
-    // GERAÇÃO DAS 300 FASES COMPLETAS
-    // ==========================================================
-    function buildStage(stageNum) {
-      if (stageNum > 300) {
-        alert("PARABÉNS! VOCÊ COMPLETOU TODAS AS 300 FASES DO BOMBERMAN!");
-        stageNum = 1;
-      }
-      currentStage = stageNum;
-      localStorage.setItem('bomberman_stage', currentStage);
-      if (currentStage > unlockedStage) {
-        unlockedStage = currentStage;
-        localStorage.setItem('bomberman_unlocked', unlockedStage);
-      }
+    function playSound(type) {
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
 
-      const rng = getStageRNG(stageNum);
+        if (type === 'bomb') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(now + 0.15);
+        } else if (type === 'explode') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(100, now);
+          osc.frequency.linearRampToValueAtTime(20, now + 0.3);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(now + 0.3);
+        } else if (type === 'item') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(880, now + 0.1);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(now + 0.2);
+        }
+      } catch (e) {}
+    }
 
-      // Limpeza de entidades
+    /* ===================================================
+       3. GERADOR DE FASES PROCEDURAIS (DETERMINÍSTICO)
+       =================================================== */
+    function generateStage(stgNum) {
       map = [];
       bombs = [];
       explosions = [];
       enemies = [];
       powerups = [];
-      exitDoor = null;
-      stageTimer = Math.max(120, 220 - Math.floor(stageNum / 3));
 
-      player.x = 1;
-      player.y = 1;
-      player.alive = true;
+      // Pseudo-random baseado no número da fase
+      let seed = stgNum * 12345;
+      function pseudoRandom() {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      }
 
-      // Monta as Paredes Fixas
-      let candidateBricks = [];
-      for (let r = 0; r < ROWS; r++) {
+      // 1. Criar Grid com paredes externas e pilares rígidos
+      for (let r = 0; r < GRID_SIZE; r++) {
         map[r] = [];
-        for (let c = 0; c < COLS; c++) {
-          if (r === 0 || r === ROWS - 1 || c === 0 || c === COLS - 1 || (r % 2 === 0 && c % 2 === 0)) {
-            map[r][c] = WALL;
-          } else if (r <= 2 && c <= 2) {
-            map[r][c] = EMPTY; // Spawn protegido
+        for (let c = 0; c < GRID_SIZE; c++) {
+          if (r === 0 || r === GRID_SIZE - 1 || c === 0 || c === GRID_SIZE - 1) {
+            map[r][c] = T_HARD;
+          } else if (r % 2 === 0 && c % 2 === 0) {
+            map[r][c] = T_HARD;
           } else {
-            // Densidade de tijolos varia progressivamente de fase em fase
-            let brickChance = 0.40 + (rng() * 0.25);
-            if (rng() < brickChance) {
-              map[r][c] = BRICK;
-              candidateBricks.push({ x: c, y: r });
-            } else {
-              map[r][c] = EMPTY;
-            }
+            map[r][c] = T_EMPTY;
           }
         }
       }
 
-      // Se houver poucos blocos, garante pelo menos alguns
-      if (candidateBricks.length < 5) {
-        map[3][3] = BRICK; candidateBricks.push({x:3, y:3});
-        map[5][5] = BRICK; candidateBricks.push({x:5, y:5});
+      // 2. Adicionar blocos destruíveis (soft blocks)
+      const softDensity = Math.min(0.35 + (stgNum * 0.001), 0.65);
+      for (let r = 1; r < GRID_SIZE - 1; r++) {
+        for (let c = 1; c < GRID_SIZE - 1; c++) {
+          if ((r <= 2 && c <= 2) || map[r][c] !== T_EMPTY) continue;
+          if (pseudoRandom() < softDensity) {
+            map[r][c] = T_SOFT;
+          }
+        }
       }
 
-      // Esconde a Porta da Fase sob um bloco destrutível
-      let doorIndex = Math.floor(rng() * candidateBricks.length);
-      exitDoor = { 
-        x: candidateBricks[doorIndex].x, 
-        y: candidateBricks[doorIndex].y, 
-        revealed: false 
-      };
+      // 3. Esconder o Portal de Saída sob um bloco destruível
+      let exitPlaced = false;
+      while (!exitPlaced) {
+        let rr = Math.floor(pseudoRandom() * (GRID_SIZE - 2)) + 1;
+        let cc = Math.floor(pseudoRandom() * (GRID_SIZE - 2)) + 1;
+        if (map[rr][cc] === T_SOFT) {
+          map[rr][cc] = T_EXIT; // Portal fica camuflado até destruir o bloco
+          exitPlaced = true;
+        }
+      }
 
-      // Esconde Power-ups aleatórios sob outros blocos
-      candidateBricks.forEach((b, index) => {
-        if (index !== doorIndex && rng() < 0.20) {
-          let type = rng() > 0.5 ? 'bomb' : 'fire';
-          powerups.push({ x: b.x, y: b.y, type: type, revealed: false });
+      // 4. Gerar Inimigos com base na dificuldade da fase
+      const numEnemies = Math.min(2 + Math.floor(stgNum / 15), 10);
+      let enemySpeed = Math.min(0.02 + (stgNum * 0.0003), 0.06);
+
+      for (let i = 0; i < numEnemies; i++) {
+        let placed = false;
+        while (!placed) {
+          let er = Math.floor(pseudoRandom() * (GRID_SIZE - 2)) + 1;
+          let ec = Math.floor(pseudoRandom() * (GRID_SIZE - 2)) + 1;
+          if (map[er][ec] === T_EMPTY && (er > 3 || ec > 3)) {
+            enemies.push({
+              x: ec,
+              y: er,
+              dirX: pseudoRandom() > 0.5 ? 1 : -1,
+              dirY: 0,
+              speed: enemySpeed
+            });
+            placed = true;
+          }
+        }
+      }
+
+      // Reset Posição do Jogador
+      player.x = 1;
+      player.y = 1;
+      player.activeBombs = 0;
+    }
+
+    /* ===================================================
+       4. LÓGICA DE ATUALIZAÇÃO E COLISÕES
+       =================================================== */
+    function update() {
+      if (gameState !== 'PLAYING') return;
+
+      // Movimento do Jogador
+      let newX = player.x;
+      let newY = player.y;
+
+      if (player.moving.up) newY -= player.speed;
+      if (player.moving.down) newY += player.speed;
+      if (player.moving.left) newX -= player.speed;
+      if (player.moving.right) newX += player.speed;
+
+      if (canMoveTo(newX, newY)) {
+        player.x = newX;
+        player.y = newY;
+      } else {
+        // Alinhamento suave ao andar no grid
+        if (player.moving.up || player.moving.down) player.x = Math.round(player.x);
+        if (player.moving.left || player.moving.right) player.y = Math.round(player.y);
+      }
+
+      // Atualizar Bombas
+      const now = Date.now();
+      for (let i = bombs.length - 1; i >= 0; i--) {
+        const b = bombs[i];
+        if (now - b.createdAt >= 2500) {
+          explodeBomb(b);
+          bombs.splice(i, 1);
+          player.activeBombs--;
+        }
+      }
+
+      // Atualizar Explosões
+      for (let i = explosions.length - 1; i >= 0; i--) {
+        if (now - explosions[i].createdAt >= 400) {
+          explosions.splice(i, 1);
+        }
+      }
+
+      // Atualizar Inimigos
+      enemies.forEach(en => {
+        let ex = en.x + en.dirX * en.speed;
+        let ey = en.y + en.dirY * en.speed;
+
+        if (canMoveEnemy(ex, ey)) {
+          en.x = ex;
+          en.y = ey;
+        } else {
+          // Mudar direção do inimigo aleatoriamente
+          if (Math.random() > 0.5) {
+            en.dirX = en.dirX !== 0 ? 0 : (Math.random() > 0.5 ? 1 : -1);
+            en.dirY = en.dirX === 0 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+          } else {
+            en.dirX = -en.dirX;
+            en.dirY = -en.dirY;
+          }
+        }
+
+        // Colisão com Jogador
+        const dist = Math.hypot(en.x - player.x, en.y - player.y);
+        if (dist < 0.6) {
+          playerHit();
         }
       });
 
-      // Criação dos Monstros (Dificuldade cresce com o nível)
-      let enemyTotal = Math.min(3 + Math.floor(stageNum / 8), 12);
-      while (enemies.length < enemyTotal) {
-        let rc = Math.floor(rng() * (ROWS - 2)) + 1;
-        let cc = Math.floor(rng() * (COLS - 2)) + 1;
-        if (map[rc][cc] === EMPTY && (rc > 3 || cc > 3)) {
-          // 4 Tipos de Inimigo baseados no progresso das 300 fases:
-          // 1: Valcom (Lento, Vermelho)
-          // 2: O'Neal (Azul, Persegue)
-          // 3: Dahl (Laranja, Rápido)
-          // 4: Minvo (Roxo, Agressivo)
-          let type = 1;
-          if (stageNum > 10 && rng() > 0.6) type = 2;
-          if (stageNum > 30 && rng() > 0.7) type = 3;
-          if (stageNum > 60 && rng() > 0.8) type = 4;
-
-          enemies.push({
-            x: cc,
-            y: rc,
-            type: type,
-            speedTick: type === 3 ? 18 : (type === 4 ? 20 : 30),
-            tick: 0
+      // Verificar Colisão com Explosões
+      explosions.forEach(exp => {
+        exp.tiles.forEach(t => {
+          if (Math.hypot(t.x - player.x, t.y - player.y) < 0.6) {
+            playerHit();
+          }
+          enemies.forEach((en, idx) => {
+            if (Math.hypot(t.x - en.x, t.y - en.y) < 0.6) {
+              enemies.splice(idx, 1);
+            }
           });
-        }
-      }
-
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        if (player.alive) {
-          stageTimer--;
-          document.getElementById('ui-time').innerText = stageTimer;
-          if (stageTimer <= 0) {
-            killPlayer("Tempo esgotado!");
-          }
-        }
-      }, 1000);
-
-      updateUI();
-    }
-
-    function updateUI() {
-      document.getElementById('ui-stage').innerText = currentStage;
-      document.getElementById('ui-time').innerText = stageTimer;
-      document.getElementById('ui-lives').innerText = player.lives;
-    }
-
-    // ==========================================================
-    // MOVIMENTAÇÃO & BOMBAS
-    // ==========================================================
-    function movePlayer(dx, dy) {
-      if (!player.alive) return;
-      let nx = player.x + dx;
-      let ny = player.y + dy;
-
-      if (map[ny][nx] === EMPTY && !bombs.some(b => b.x === nx && b.y === ny)) {
-        player.x = nx;
-        player.y = ny;
-
-        // Pegar power-ups
-        for (let i = powerups.length - 1; i >= 0; i--) {
-          let p = powerups[i];
-          if (p.revealed && p.x === nx && p.y === ny) {
-            if (p.type === 'bomb') player.maxBombs++;
-            if (p.type === 'fire') player.fireRange++;
-            sfx('item');
-            powerups.splice(i, 1);
-          }
-        }
-
-        // Entrar na Porta para a Próxima Fase
-        if (exitDoor && exitDoor.revealed && exitDoor.x === nx && exitDoor.y === ny) {
-          if (enemies.length === 0) {
-            sfx('win');
-            setTimeout(() => {
-              alert(`Excelente! Fase ${currentStage} concluída!`);
-              buildStage(currentStage + 1);
-            }, 100);
-          }
-        }
-      }
-    }
-
-    function placeBomb() {
-      if (!player.alive) return;
-      if (bombs.length >= player.maxBombs) return;
-
-      if (!bombs.some(b => b.x === player.x && b.y === player.y)) {
-        bombs.push({
-          x: player.x,
-          y: player.y,
-          timer: 160,
-          range: player.fireRange
         });
-        sfx('plant');
+      });
+
+      // Checar Portal de Saída para Avançar de Fase
+      const pGridX = Math.round(player.x);
+      const pGridY = Math.round(player.y);
+      if (enemies.length === 0 && map[pGridY][pGridX] === T_EMPTY) {
+        // Se a saída estiver limpa e todos os inimigos derrotados
+        stageClear();
       }
+    }
+
+    function canMoveTo(x, y) {
+      const padding = 0.2;
+      const points = [
+        { x: x + padding, y: y + padding },
+        { x: x + 1 - padding, y: y + padding },
+        { x: x + padding, y: y + 1 - padding },
+        { x: x + 1 - padding, y: y + 1 - padding }
+      ];
+
+      for (let p of points) {
+        let gx = Math.floor(p.x);
+        let gy = Math.floor(p.y);
+        if (gx < 0 || gx >= GRID_SIZE || gy < 0 || gy >= GRID_SIZE) return false;
+        let tile = map[gy][gx];
+        if (tile === T_HARD || tile === T_SOFT) return false;
+      }
+      return true;
+    }
+
+    function canMoveEnemy(x, y) {
+      let gx = Math.round(x);
+      let gy = Math.round(y);
+      if (gx < 0 || gx >= GRID_SIZE || gy < 0 || gy >= GRID_SIZE) return false;
+      return map[gy][gx] === T_EMPTY;
+    }
+
+    function dropBomb() {
+      if (gameState !== 'PLAYING') return;
+      if (player.activeBombs >= player.maxBombs) return;
+
+      const bx = Math.round(player.x);
+      const by = Math.round(player.y);
+
+      // Não colocar duas bombas na mesma casa
+      if (bombs.some(b => b.x === bx && b.y === by)) return;
+
+      initAudio();
+      playSound('bomb');
+
+      bombs.push({
+        x: bx,
+        y: by,
+        createdAt: Date.now()
+      });
+      player.activeBombs++;
     }
 
     function explodeBomb(bomb) {
-      sfx('boom');
-      let affected = [{ x: bomb.x, y: bomb.y }];
-      const dirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}];
+      playSound('explode');
+      const expTiles = [{ x: bomb.x, y: bomb.y }];
+      const dirs = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
 
       dirs.forEach(d => {
-        for (let step = 1; step <= bomb.range; step++) {
-          let tx = bomb.x + d.x * step;
-          let ty = bomb.y + d.y * step;
+        for (let i = 1; i <= player.fireRange; i++) {
+          let tx = bomb.x + d.x * i;
+          let ty = bomb.y + d.y * i;
 
-          if (map[ty][tx] === WALL) break;
+          if (tx < 0 || tx >= GRID_SIZE || ty < 0 || ty >= GRID_SIZE) break;
 
-          affected.push({ x: tx, y: ty });
+          let tile = map[ty][tx];
+          if (tile === T_HARD) break;
 
-          if (map[ty][tx] === BRICK) {
-            map[ty][tx] = EMPTY;
-            // Revela porta se estiver aqui
-            if (exitDoor && exitDoor.x === tx && exitDoor.y === ty) {
-              exitDoor.revealed = true;
-            }
-            // Revela itens se estiverem aqui
-            powerups.forEach(p => {
-              if (p.x === tx && p.y === ty) p.revealed = true;
-            });
+          expTiles.push({ x: tx, y: ty });
+
+          if (tile === T_SOFT || tile === T_EXIT) {
+            map[ty][tx] = T_EMPTY; // Destrói bloco macio
             break;
           }
-
-          // Detona outras bombas em cadeia
-          let other = bombs.find(b => b.x === tx && b.y === ty);
-          if (other) other.timer = 0;
         }
       });
 
-      explosions.push({ tiles: affected, timer: 24 });
-    }
-
-    function killPlayer(msg) {
-      if (!player.alive) return;
-      player.alive = false;
-      sfx('die');
-      player.lives--;
-      updateUI();
-
-      setTimeout(() => {
-        if (player.lives > 0) {
-          player.x = 1;
-          player.y = 1;
-          player.alive = true;
-        } else {
-          alert(msg || "Fim de Jogo! Recomeçando...");
-          player.lives = 3;
-          player.maxBombs = 1;
-          player.fireRange = 1;
-          buildStage(1);
-        }
-      }, 700);
-    }
-
-    // ==========================================================
-    // LOOP PRINCIPAL DO MOTOR GRÁFICO
-    // ==========================================================
-    function update() {
-      // 1. Atualiza Bombas
-      for (let i = bombs.length - 1; i >= 0; i--) {
-        bombs[i].timer--;
-        if (bombs[i].timer <= 0) {
-          explodeBomb(bombs[i]);
-          bombs.splice(i, 1);
-        }
-      }
-
-      // 2. Atualiza Explosões de Fogo
-      for (let i = explosions.length - 1; i >= 0; i--) {
-        explosions[i].timer--;
-        let exp = explosions[i];
-
-        exp.tiles.forEach(t => {
-          // Mata jogador
-          if (player.alive && player.x === t.x && player.y === t.y) {
-            killPlayer("Você foi pego pela explosão!");
-          }
-          // Mata monstros
-          for (let eIdx = enemies.length - 1; eIdx >= 0; eIdx--) {
-            if (enemies[eIdx].x === t.x && enemies[eIdx].y === t.y) {
-              enemies.splice(eIdx, 1);
-            }
-          }
-          // Fogo destrói itens desprotegidos
-          powerups = powerups.filter(p => !(p.revealed && p.x === t.x && p.y === t.y));
-        });
-
-        if (exp.timer <= 0) explosions.splice(i, 1);
-      }
-
-      // 3. Inteligência Artificial dos Inimigos
-      enemies.forEach(en => {
-        en.tick++;
-        if (en.tick >= en.speedTick) {
-          en.tick = 0;
-          const dirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}];
-          let possible = dirs.filter(d => {
-            let nx = en.x + d.x;
-            let ny = en.y + d.y;
-            return map[ny] && map[ny][nx] === EMPTY && !bombs.some(b => b.x === nx && b.y === ny);
-          });
-
-          if (possible.length > 0) {
-            let chosen = possible[Math.floor(Math.random() * possible.length)];
-
-            // Inimigos inteligentes (Tipo 2 e 4) tentam se aproximar do jogador
-            if ((en.type === 2 || en.type === 4) && Math.random() < 0.6) {
-              let smartDirs = possible.filter(d => {
-                let distCurrent = Math.hypot(player.x - en.x, player.y - en.y);
-                let distNext = Math.hypot(player.x - (en.x + d.x), player.y - (en.y + d.y));
-                return distNext < distCurrent;
-              });
-              if (smartDirs.length > 0) chosen = smartDirs[0];
-            }
-
-            en.x += chosen.x;
-            en.y += chosen.y;
-          }
-        }
-
-        // Colisão com o Jogador
-        if (player.alive && en.x === player.x && en.y === player.y) {
-          killPlayer("Um monstro te pegou!");
-        }
+      explosions.push({
+        tiles: expTiles,
+        createdAt: Date.now()
       });
     }
 
+    function playerHit() {
+      lives--;
+      updateHUD();
+      if (lives <= 0) {
+        gameState = 'GAMEOVER';
+        showOverlay('GAME OVER', `Você chegou até a Fase ${stage}`);
+      } else {
+        player.x = 1;
+        player.y = 1;
+      }
+    }
+
+    function stageClear() {
+      gameState = 'STAGE_CLEAR';
+      if (stage > maxUnlockedStage) {
+        maxUnlockedStage = Math.min(stage + 1, TOTAL_STAGES);
+        localStorage.setItem('bm5_unlocked_stage', maxUnlockedStage);
+      }
+
+      if (stage >= TOTAL_STAGES) {
+        showOverlay('🏆 VOCÊ ZEROU O JOGO!', 'Parabéns! Você venceu as 300 Fases!');
+      } else {
+        stage++;
+        showOverlay(`FASE ${stage - 1} CONCLUÍDA!`, `Avançando para a Fase ${stage}...`);
+        setTimeout(() => {
+          startGame(stage);
+        }, 1500);
+      }
+    }
+
+    /* ===================================================
+       5. RENDERIZAÇÃO GRÁFICA NO CANVAS
+       =================================================== */
     function render() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Limpar Tela
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Mapa (Chão e Blocos)
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (map[r][c] === WALL) {
-            ctx.fillStyle = '#424242';
-            ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
-            ctx.strokeStyle = '#212121';
-            ctx.strokeRect(c * TILE + 2, r * TILE + 2, TILE - 4, TILE - 4);
-          } else if (map[r][c] === BRICK) {
-            ctx.fillStyle = '#bcaaa4';
-            ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
-            ctx.strokeStyle = '#8d6e63';
-            ctx.strokeRect(c * TILE + 2, r * TILE + 2, TILE - 4, TILE - 4);
+      // Renderizar Mapa
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const tile = map[r][c];
+          const px = c * TILE_SIZE;
+          const py = r * TILE_SIZE;
+
+          if (tile === T_HARD) {
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+            ctx.strokeStyle = '#1f2937';
+            ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
+          } else if (tile === T_SOFT) {
+            ctx.fillStyle = '#d97706';
+            ctx.fillRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+            ctx.strokeStyle = '#b45309';
+            ctx.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+          } else {
+            ctx.fillStyle = '#10b981'; // Chão verde
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+            ctx.strokeStyle = '#059669';
+            ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
           }
         }
       }
 
-      // Porta de Saída
-      if (exitDoor && exitDoor.revealed && map[exitDoor.y][exitDoor.x] === EMPTY) {
-        ctx.fillStyle = enemies.length === 0 ? '#00e676' : '#555';
-        ctx.fillRect(exitDoor.x * TILE + 6, exitDoor.y * TILE + 6, TILE - 12, TILE - 12);
-        ctx.strokeStyle = '#fff';
-        ctx.strokeRect(exitDoor.x * TILE + 8, exitDoor.y * TILE + 8, TILE - 16, TILE - 16);
-      }
-
-      // Itens Revelados
-      powerups.forEach(p => {
-        if (p.revealed && map[p.y][p.x] === EMPTY) {
-          ctx.font = '22px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(p.type === 'bomb' ? '💣' : '🔥', p.x * TILE + TILE / 2, p.y * TILE + 28);
-        }
-      });
-
-      // Bombas
+      // Renderizar Bombas (Preto/Vermelho Pulsante)
       bombs.forEach(b => {
-        let pulse = Math.sin(Date.now() / 90) * 3;
-        ctx.fillStyle = '#111';
+        ctx.fillStyle = (Math.floor(Date.now() / 200) % 2 === 0) ? '#111827' : '#dc2626';
         ctx.beginPath();
-        ctx.arc(b.x * TILE + TILE/2, b.y * TILE + TILE/2, (TILE/2.4) + pulse/2, 0, Math.PI * 2);
+        ctx.arc((b.x + 0.5) * TILE_SIZE, (b.y + 0.5) * TILE_SIZE, TILE_SIZE * 0.4, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = '#ff3d00';
-        ctx.fillRect(b.x * TILE + TILE/2 - 2, b.y * TILE + 3, 4, 7);
       });
 
-      // Efeito de Fogo da Explosão
-      ctx.fillStyle = 'rgba(255, 87, 34, 0.85)';
+      // Renderizar Explosões (Laranja/Amarelo)
       explosions.forEach(exp => {
         exp.tiles.forEach(t => {
-          ctx.fillRect(t.x * TILE, t.y * TILE, TILE, TILE);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(t.x * TILE_SIZE, t.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         });
       });
 
-      // Inimigos com cores correspondentes à sua dificuldade
+      // Renderizar Inimigos (Roxos/Vermelhos)
       enemies.forEach(en => {
-        let colors = ['#e91e63', '#00bcd4', '#ff9800', '#9c27b0'];
-        ctx.fillStyle = colors[en.type - 1];
+        ctx.fillStyle = '#ef4444';
         ctx.beginPath();
-        ctx.arc(en.x * TILE + TILE/2, en.y * TILE + TILE/2, TILE/2.5, 0, Math.PI * 2);
+        ctx.arc((en.x + 0.5) * TILE_SIZE, (en.y + 0.5) * TILE_SIZE, TILE_SIZE * 0.38, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(en.x * TILE + 10, en.y * TILE + 12, 6, 6);
-        ctx.fillRect(en.x * TILE + 24, en.y * TILE + 12, 6, 6);
       });
 
-      // Jogador (Bomberman)
-      if (player.alive) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(player.x * TILE + 9, player.y * TILE + 9, TILE - 18, TILE - 18);
-        ctx.fillStyle = '#1976d2';
-        ctx.fillRect(player.x * TILE + 12, player.y * TILE + 3, TILE - 24, 8);
+      // Renderizar Jogador (Bomberman Azul/Branco)
+      ctx.fillStyle = '#3b82f6';
+      ctx.beginPath();
+      ctx.arc((player.x + 0.5) * TILE_SIZE, (player.y + 0.5) * TILE_SIZE, TILE_SIZE * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect((player.x + 0.3) * TILE_SIZE, (player.y + 0.3) * TILE_SIZE, TILE_SIZE * 0.4, TILE_SIZE * 0.2);
+    }
+
+    /* ===================================================
+       6. INTERFACE E CONTROLES
+       =================================================== */
+    function updateHUD() {
+      document.getElementById('hud-stage').textContent = stage;
+      document.getElementById('hud-lives').textContent = `❤️ ${lives}`;
+      document.getElementById('hud-bombs').textContent = `💣 ${player.maxBombs}`;
+    }
+
+    function showOverlay(title, sub) {
+      document.getElementById('ov-title').textContent = title;
+      document.getElementById('ov-sub').textContent = sub;
+      document.getElementById('stage-select-box').classList.remove('hidden');
+      document.getElementById('overlay').classList.remove('hidden');
+    }
+
+    function startGame(customStage) {
+      initAudio();
+      if (customStage) {
+        stage = customStage;
+      } else {
+        const inputVal = parseInt(document.getElementById('stageInput').value);
+        stage = Math.max(1, Math.min(inputVal || 1, maxUnlockedStage));
+      }
+
+      lives = 3;
+      player.maxBombs = 1;
+      player.fireRange = 1;
+
+      generateStage(stage);
+      updateHUD();
+
+      document.getElementById('overlay').classList.add('hidden');
+      gameState = 'PLAYING';
+
+      if (!gameLoopId) {
+        gameLoop();
       }
     }
 
     function gameLoop() {
       update();
       render();
-      requestAnimationFrame(gameLoop);
+      gameLoopId = requestAnimationFrame(gameLoop);
     }
 
-    // ==========================================================
-    // CONTROLES DE ENTRADA
-    // ==========================================================
+    // EVENTOS DE TECLADO
     window.addEventListener('keydown', e => {
-      if (e.key === 'ArrowUp' || e.key === 'w') movePlayer(0, -1);
-      if (e.key === 'ArrowDown' || e.key === 's') movePlayer(0, 1);
-      if (e.key === 'ArrowLeft' || e.key === 'a') movePlayer(-1, 0);
-      if (e.key === 'ArrowRight' || e.key === 'd') movePlayer(1, 0);
-      if (e.key === ' ' || e.key === 'Enter') placeBomb();
+      if (e.key === 'ArrowUp' || e.key === 'w') player.moving.up = true;
+      if (e.key === 'ArrowDown' || e.key === 's') player.moving.down = true;
+      if (e.key === 'ArrowLeft' || e.key === 'a') player.moving.left = true;
+      if (e.key === 'ArrowRight' || e.key === 'd') player.moving.right = true;
+      if (e.key === ' ' || e.key === 'Enter') dropBomb();
     });
 
-    const addAction = (id, fn) => {
-      const el = document.getElementById(id);
-      el.addEventListener('touchstart', (e) => { e.preventDefault(); fn(); }, { passive: false });
-      el.addEventListener('click', (e) => { e.preventDefault(); fn(); });
-    };
+    window.addEventListener('keyup', e => {
+      if (e.key === 'ArrowUp' || e.key === 'w') player.moving.up = false;
+      if (e.key === 'ArrowDown' || e.key === 's') player.moving.down = false;
+      if (e.key === 'ArrowLeft' || e.key === 'a') player.moving.left = false;
+      if (e.key === 'ArrowRight' || e.key === 'd') player.moving.right = false;
+    });
 
-    addAction('btn-up', () => movePlayer(0, -1));
-    addAction('btn-down', () => movePlayer(0, 1));
-    addAction('btn-left', () => movePlayer(-1, 0));
-    addAction('btn-right', () => movePlayer(1, 0));
-    addAction('btn-bomb', () => placeBomb());
+    // CONTROLES TOUCH PAINEL
+    function bindTouch(id, action) {
+      const btn = document.getElementById(id);
+      btn.addEventListener('touchstart', e => {
+        e.preventDefault();
+        action(true);
+      });
+      btn.addEventListener('touchend', e => {
+        e.preventDefault();
+        action(false);
+      });
+      btn.addEventListener('mousedown', () => action(true));
+      btn.addEventListener('mouseup', () => action(false));
+    }
 
-    // Botão para navegar pelas fases liberadas
-    document.getElementById('btn-select-stage').onclick = () => {
-      let target = prompt(`Escolha uma fase de 1 até ${unlockedStage}:`, currentStage);
-      target = parseInt(target);
-      if (target >= 1 && target <= unlockedStage) {
-        buildStage(target);
-      } else {
-        alert("Fase inválida ou ainda bloqueada!");
+    bindTouch('btn-up', val => player.moving.up = val);
+    bindTouch('btn-down', val => player.moving.down = val);
+    bindTouch('btn-left', val => player.moving.left = val);
+    bindTouch('btn-right', val => player.moving.right = val);
+
+    document.getElementById('btn-bomb').addEventListener('touchstart', e => {
+      e.preventDefault();
+      dropBomb();
+    });
+    document.getElementById('btn-bomb').addEventListener('click', dropBomb);
+
+    // INICIALIZAÇÃO
+    window.addEventListener('load', () => {
+      const savedStage = localStorage.getItem('bm5_unlocked_stage');
+      if (savedStage) {
+        maxUnlockedStage = parseInt(savedStage);
+        document.getElementById('stageInput').value = maxUnlockedStage;
+        document.getElementById('stageInput').max = maxUnlockedStage;
       }
-    };
-
-    // Iniciar na fase salva
-    buildStage(currentStage);
-    requestAnimationFrame(gameLoop);
+      render(); // Primeira renderização garantida da tela
+    });
   </script>
 </body>
 </html>
