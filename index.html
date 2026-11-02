@@ -1,794 +1,402 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
+  <title>Basic Bomberman HTML Game</title>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Super Bomberman 5 - 300 Fases</title>
-
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
 
-    body {
-      background-color: #0d1117;
-      color: #ffffff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      overflow: hidden;
-    }
+  body {
+    background: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-    /* CONTAINER PRINCIPAL DO JOGO */
-    #game-container {
-      position: relative;
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #161b22;
-      border: 3px solid #30363d;
-      border-radius: 12px;
-      padding: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-    }
-
-    /* BARRA SUPERIOR DE STATUS */
-    #hud {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #21262d;
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      font-weight: bold;
-      font-size: 0.85rem;
-    }
-
-    .hud-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .hud-val {
-      color: #58a6ff;
-    }
-
-    /* CANVAS DO JOGO */
-    canvas {
-      background: #000;
-      border-radius: 6px;
-      display: block;
-      width: 100%;
-      height: auto;
-      image-rendering: pixelated;
-    }
-
-    /* CONTROLES TOUCH PARA CELULAR */
-    #touch-controls {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 12px;
-      padding: 0 10px;
-    }
-
-    .dpad {
-      display: grid;
-      grid-template-columns: repeat(3, 45px);
-      grid-template-rows: repeat(3, 45px);
-      gap: 3px;
-    }
-
-    .dbtn {
-      background: #30363d;
-      border: 2px solid #8b949e;
-      border-radius: 8px;
-      color: white;
-      font-size: 1.2rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-
-    .dbtn:active {
-      background: #58a6ff;
-    }
-
-    #btn-up { grid-column: 2; grid-row: 1; }
-    #btn-left { grid-column: 1; grid-row: 2; }
-    #btn-right { grid-column: 3; grid-row: 2; }
-    #btn-down { grid-column: 2; grid-row: 3; }
-
-    .bomb-btn-box {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #btn-bomb {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: #da3633;
-      border: 4px solid #f85149;
-      color: white;
-      font-size: 1rem;
-      font-weight: 900;
-      box-shadow: 0 4px 12px rgba(218, 54, 51, 0.5);
-      touch-action: manipulation;
-    }
-
-    #btn-bomb:active {
-      transform: scale(0.95);
-      background: #b62324;
-    }
-
-    /* TELA DE OVERLAY / MENU DE SELEÇÃO DE FASES */
-    .overlay-screen {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(13, 17, 23, 0.95);
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 10;
-    }
-
-    .overlay-title {
-      font-size: 1.6rem;
-      font-weight: 900;
-      color: #f0883e;
-      margin-bottom: 8px;
-      text-align: center;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    }
-
-    .overlay-sub {
-      font-size: 0.85rem;
-      color: #8b949e;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .btn-main {
-      background: #238636;
-      border: 2px solid #2ea043;
-      color: white;
-      font-size: 1rem;
-      font-weight: bold;
-      padding: 10px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(35, 134, 54, 0.4);
-      margin-top: 8px;
-    }
-
-    .btn-main:active {
-      transform: scale(0.96);
-    }
-
-    .stage-selector-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 12px 0;
-    }
-
-    .stage-input-num {
-      width: 80px;
-      background: #21262d;
-      border: 2px solid #30363d;
-      color: #58a6ff;
-      font-size: 1.2rem;
-      font-weight: bold;
-      text-align: center;
-      border-radius: 6px;
-      padding: 4px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
+  canvas {
+    background: forestgreen;
+  }
   </style>
 </head>
 <body>
+<canvas width="960" height="832" id="game"></canvas>
+<script>
+const canvas = document.getElementById('game');
+const context = canvas.getContext('2d');
+const grid = 64;
+const numRows = 13;
+const numCols = 15;
 
-  <div id="game-container">
-    <!-- HUD DE INFORMAÇÕES DO JOGO -->
-    <div id="hud">
-      <div class="hud-item">FASE: <span class="hud-val" id="hud-stage">1</span>/300</div>
-      <div class="hud-item">VIDAS: <span class="hud-val" id="hud-lives">❤️ 3</span></div>
-      <div class="hud-item">BOMBAS: <span class="hud-val" id="hud-bombs">💣 1</span></div>
-    </div>
+// create a new canvas and draw the soft wall image. then we can use this
+// canvas to draw the images later on
+const softWallCanvas = document.createElement('canvas');
+const softWallCtx = softWallCanvas.getContext('2d');
+softWallCanvas.width = softWallCanvas.height = grid;
 
-    <!-- CANVAS DO BOMBERMAN -->
-    <canvas id="gameCanvas" width="390" height="390"></canvas>
+softWallCtx.fillStyle = 'black';
+softWallCtx.fillRect(0, 0, grid, grid);
+softWallCtx.fillStyle = '#a9a9a9';
 
-    <!-- CONTROLES VIRTUAIS TOUCH -->
-    <div id="touch-controls">
-      <div class="dpad">
-        <button class="dbtn" id="btn-up">▲</button>
-        <button class="dbtn" id="btn-left">◄</button>
-        <button class="dbtn" id="btn-right">►</button>
-        <button class="dbtn" id="btn-down">▼</button>
-      </div>
+// 1st row brick
+softWallCtx.fillRect(1, 1, grid - 2, 20);
 
-      <div class="bomb-btn-box">
-        <button id="btn-bomb">BOMBA</button>
-      </div>
-    </div>
+// 2nd row bricks
+softWallCtx.fillRect(0, 23, 20, 18);
+softWallCtx.fillRect(22, 23, 42, 18);
 
-    <!-- MENU INICIAL / OVERLAY DE DERROTA/VITÓRIA -->
-    <div id="overlay" class="overlay-screen">
-      <div class="overlay-title" id="ov-title">SUPER BOMBERMAN 5</div>
-      <div class="overlay-sub" id="ov-sub">300 FASES PROCEDURAIS</div>
+// 3rd row bricks
+softWallCtx.fillRect(0, 43, 42, 20);
+softWallCtx.fillRect(44, 43, 20, 20);
 
-      <div class="stage-selector-container" id="stage-select-box">
-        <label for="stageInput" style="font-size: 0.85rem;">Escolher Fase:</label>
-        <input type="number" id="stageInput" class="stage-input-num" min="1" max="300" value="1">
-      </div>
+// create a new canvas and draw the soft wall image. then we can use this
+// canvas to draw the images later on
+const wallCanvas = document.createElement('canvas');
+const wallCtx = wallCanvas.getContext('2d');
+wallCanvas.width = wallCanvas.height = grid;
 
-      <button class="btn-main" id="btn-start" onclick="startGame()">JOGAR AGORA</button>
-    </div>
-  </div>
+wallCtx.fillStyle = 'black';
+wallCtx.fillRect(0, 0, grid, grid);
+wallCtx.fillStyle = 'white';
+wallCtx.fillRect(0, 0, grid - 2, grid - 2);
+wallCtx.fillStyle = '#a9a9a9';
+wallCtx.fillRect(2, 2, grid - 4, grid - 4);
 
-  <script>
-    /* ===================================================
-       1. CONFIGURAÇÕES BASE E VARIÁVEIS DO JOGO
-       =================================================== */
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+// create a mapping of object types
+const types = {
+  wall: '▉',
+  softWall: 1,
+  bomb: 2
+};
 
-    const GRID_SIZE = 13;
-    const TILE_SIZE = 30; // 13 * 30 = 390px
-    const TOTAL_STAGES = 300;
+// keep track of all entities
+let entities = [];
 
-    // TIPOS DE BLOCOS NO MAPA
-    const T_EMPTY = 0;
-    const T_HARD = 1;  // Inquebrável
-    const T_SOFT = 2;  // Destruível
-    const T_EXIT = 3;  // Portal de Saída
+// keep track of what is in every cell of the game using a 2d array. the
+// template is used to note where walls are and where soft walls cannot spawn.
+// '▉' represents a wall
+// 'x' represents a cell that cannot have a soft wall (player start zone)
+let cells = [];
+const template = [
+  ['▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉'],
+  ['▉','x','x',   ,   ,   ,   ,   ,   ,   ,   ,   ,'x','x','▉'],
+  ['▉','x','▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉','x','▉'],
+  ['▉','x',   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,'x','▉'],
+  ['▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉'],
+  ['▉',   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,'▉'],
+  ['▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉'],
+  ['▉',   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,'▉'],
+  ['▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉'],
+  ['▉','x',   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,'x','▉'],
+  ['▉','x','▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉',   ,'▉','x','▉'],
+  ['▉','x','x',   ,   ,   ,   ,   ,   ,   ,   ,   ,'x','x','▉'],
+  ['▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉','▉']
+];
 
-    let stage = 1;
-    let lives = 3;
-    let maxUnlockedStage = 1;
-    let gameLoopId = null;
-    let gameState = 'MENU'; // 'MENU', 'PLAYING', 'GAMEOVER', 'STAGE_CLEAR'
+// populate the level with walls and soft walls
+function generateLevel() {
+  cells = [];
 
-    // ESTADO DO JOGADOR
-    let player = {
-      x: 1,
-      y: 1,
-      speed: 0.08,
-      maxBombs: 1,
-      activeBombs: 0,
-      fireRange: 1,
-      moving: { up: false, down: false, left: false, right: false }
-    };
+  for (let row = 0; row < numRows; row++) {
+    cells[row] = [];
 
-    let map = [];
-    let bombs = [];
-    let explosions = [];
-    let enemies = [];
-    let powerups = [];
+    for (let col = 0; col < numCols; col++) {
 
-    /* ===================================================
-       2. EFEITOS SONOROS (WEB AUDIO API SINTETIZADO)
-       =================================================== */
-    let audioCtx = null;
-
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      // 90% chance cells will contain a soft wall
+      if (!template[row][col] && Math.random() < 0.90) {
+        cells[row][col] = types.softWall;
+      }
+      else if (template[row][col] === types.wall) {
+        cells[row][col] = types.wall;
       }
     }
+  }
+}
 
-    function playSound(type) {
-      if (!audioCtx) return;
-      try {
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+// blow up a bomb and its surrounding tiles
+function blowUpBomb(bomb) {
 
-        if (type === 'bomb') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(150, now);
-          osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-          gain.gain.setValueAtTime(0.3, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(now + 0.15);
-        } else if (type === 'explode') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(100, now);
-          osc.frequency.linearRampToValueAtTime(20, now + 0.3);
-          gain.gain.setValueAtTime(0.4, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(now + 0.3);
-        } else if (type === 'item') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(440, now);
-          osc.frequency.setValueAtTime(880, now + 0.1);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(now + 0.2);
-        }
-      } catch (e) {}
-    }
+  // bomb has already exploded so don't blow up again
+  if (!bomb.alive) return;
 
-    /* ===================================================
-       3. GERADOR DE FASES PROCEDURAIS (DETERMINÍSTICO)
-       =================================================== */
-    function generateStage(stgNum) {
-      map = [];
-      bombs = [];
-      explosions = [];
-      enemies = [];
-      powerups = [];
+  bomb.alive = false;
 
-      // Pseudo-random baseado no número da fase
-      let seed = stgNum * 12345;
-      function pseudoRandom() {
-        seed = (seed * 9301 + 49297) % 233280;
-        return seed / 233280;
+  // remove bomb from grid
+  cells[bomb.row][bomb.col] = null;
+
+  // explode bomb outward by size
+  const dirs = [{
+    // up
+    row: -1,
+    col: 0
+  }, {
+    // down
+    row: 1,
+    col: 0
+  }, {
+    // left
+    row: 0,
+    col: -1
+  }, {
+    // right
+    row: 0,
+    col: 1
+  }];
+  dirs.forEach((dir) => {
+    for (let i = 0; i < bomb.size; i++) {
+      const row = bomb.row + dir.row * i;
+      const col = bomb.col + dir.col * i;
+      const cell = cells[row][col];
+
+      // stop the explosion if it hit a wall
+      if (cell === types.wall) {
+        return;
       }
 
-      // 1. Criar Grid com paredes externas e pilares rígidos
-      for (let r = 0; r < GRID_SIZE; r++) {
-        map[r] = [];
-        for (let c = 0; c < GRID_SIZE; c++) {
-          if (r === 0 || r === GRID_SIZE - 1 || c === 0 || c === GRID_SIZE - 1) {
-            map[r][c] = T_HARD;
-          } else if (r % 2 === 0 && c % 2 === 0) {
-            map[r][c] = T_HARD;
-          } else {
-            map[r][c] = T_EMPTY;
-          }
-        }
-      }
+      // center of the explosion is the first iteration of the loop
+      entities.push(new Explosion(row, col, dir, i === 0 ? true : false));
+      cells[row][col] = null;
 
-      // 2. Adicionar blocos destruíveis (soft blocks)
-      const softDensity = Math.min(0.35 + (stgNum * 0.001), 0.65);
-      for (let r = 1; r < GRID_SIZE - 1; r++) {
-        for (let c = 1; c < GRID_SIZE - 1; c++) {
-          if ((r <= 2 && c <= 2) || map[r][c] !== T_EMPTY) continue;
-          if (pseudoRandom() < softDensity) {
-            map[r][c] = T_SOFT;
-          }
-        }
-      }
+      // bomb hit another bomb so blow that one up too
+      if (cell === types.bomb) {
 
-      // 3. Esconder o Portal de Saída sob um bloco destruível
-      let exitPlaced = false;
-      while (!exitPlaced) {
-        let rr = Math.floor(pseudoRandom() * (GRID_SIZE - 2)) + 1;
-        let cc = Math.floor(pseudoRandom() * (GRID_SIZE - 2)) + 1;
-        if (map[rr][cc] === T_SOFT) {
-          map[rr][cc] = T_EXIT; // Portal fica camuflado até destruir o bloco
-          exitPlaced = true;
-        }
-      }
-
-      // 4. Gerar Inimigos com base na dificuldade da fase
-      const numEnemies = Math.min(2 + Math.floor(stgNum / 15), 10);
-      let enemySpeed = Math.min(0.02 + (stgNum * 0.0003), 0.06);
-
-      for (let i = 0; i < numEnemies; i++) {
-        let placed = false;
-        while (!placed) {
-          let er = Math.floor(pseudoRandom() * (GRID_SIZE - 2)) + 1;
-          let ec = Math.floor(pseudoRandom() * (GRID_SIZE - 2)) + 1;
-          if (map[er][ec] === T_EMPTY && (er > 3 || ec > 3)) {
-            enemies.push({
-              x: ec,
-              y: er,
-              dirX: pseudoRandom() > 0.5 ? 1 : -1,
-              dirY: 0,
-              speed: enemySpeed
-            });
-            placed = true;
-          }
-        }
-      }
-
-      // Reset Posição do Jogador
-      player.x = 1;
-      player.y = 1;
-      player.activeBombs = 0;
-    }
-
-    /* ===================================================
-       4. LÓGICA DE ATUALIZAÇÃO E COLISÕES
-       =================================================== */
-    function update() {
-      if (gameState !== 'PLAYING') return;
-
-      // Movimento do Jogador
-      let newX = player.x;
-      let newY = player.y;
-
-      if (player.moving.up) newY -= player.speed;
-      if (player.moving.down) newY += player.speed;
-      if (player.moving.left) newX -= player.speed;
-      if (player.moving.right) newX += player.speed;
-
-      if (canMoveTo(newX, newY)) {
-        player.x = newX;
-        player.y = newY;
-      } else {
-        // Alinhamento suave ao andar no grid
-        if (player.moving.up || player.moving.down) player.x = Math.round(player.x);
-        if (player.moving.left || player.moving.right) player.y = Math.round(player.y);
-      }
-
-      // Atualizar Bombas
-      const now = Date.now();
-      for (let i = bombs.length - 1; i >= 0; i--) {
-        const b = bombs[i];
-        if (now - b.createdAt >= 2500) {
-          explodeBomb(b);
-          bombs.splice(i, 1);
-          player.activeBombs--;
-        }
-      }
-
-      // Atualizar Explosões
-      for (let i = explosions.length - 1; i >= 0; i--) {
-        if (now - explosions[i].createdAt >= 400) {
-          explosions.splice(i, 1);
-        }
-      }
-
-      // Atualizar Inimigos
-      enemies.forEach(en => {
-        let ex = en.x + en.dirX * en.speed;
-        let ey = en.y + en.dirY * en.speed;
-
-        if (canMoveEnemy(ex, ey)) {
-          en.x = ex;
-          en.y = ey;
-        } else {
-          // Mudar direção do inimigo aleatoriamente
-          if (Math.random() > 0.5) {
-            en.dirX = en.dirX !== 0 ? 0 : (Math.random() > 0.5 ? 1 : -1);
-            en.dirY = en.dirX === 0 ? (Math.random() > 0.5 ? 1 : -1) : 0;
-          } else {
-            en.dirX = -en.dirX;
-            en.dirY = -en.dirY;
-          }
-        }
-
-        // Colisão com Jogador
-        const dist = Math.hypot(en.x - player.x, en.y - player.y);
-        if (dist < 0.6) {
-          playerHit();
-        }
-      });
-
-      // Verificar Colisão com Explosões
-      explosions.forEach(exp => {
-        exp.tiles.forEach(t => {
-          if (Math.hypot(t.x - player.x, t.y - player.y) < 0.6) {
-            playerHit();
-          }
-          enemies.forEach((en, idx) => {
-            if (Math.hypot(t.x - en.x, t.y - en.y) < 0.6) {
-              enemies.splice(idx, 1);
-            }
-          });
+        // find the bomb that was hit by comparing positions
+        const nextBomb = entities.find((entity) => {
+          return (
+            entity.type === types.bomb &&
+            entity.row === row && entity.col === col
+          );
         });
-      });
-
-      // Checar Portal de Saída para Avançar de Fase
-      const pGridX = Math.round(player.x);
-      const pGridY = Math.round(player.y);
-      if (enemies.length === 0 && map[pGridY][pGridX] === T_EMPTY) {
-        // Se a saída estiver limpa e todos os inimigos derrotados
-        stageClear();
-      }
-    }
-
-    function canMoveTo(x, y) {
-      const padding = 0.2;
-      const points = [
-        { x: x + padding, y: y + padding },
-        { x: x + 1 - padding, y: y + padding },
-        { x: x + padding, y: y + 1 - padding },
-        { x: x + 1 - padding, y: y + 1 - padding }
-      ];
-
-      for (let p of points) {
-        let gx = Math.floor(p.x);
-        let gy = Math.floor(p.y);
-        if (gx < 0 || gx >= GRID_SIZE || gy < 0 || gy >= GRID_SIZE) return false;
-        let tile = map[gy][gx];
-        if (tile === T_HARD || tile === T_SOFT) return false;
-      }
-      return true;
-    }
-
-    function canMoveEnemy(x, y) {
-      let gx = Math.round(x);
-      let gy = Math.round(y);
-      if (gx < 0 || gx >= GRID_SIZE || gy < 0 || gy >= GRID_SIZE) return false;
-      return map[gy][gx] === T_EMPTY;
-    }
-
-    function dropBomb() {
-      if (gameState !== 'PLAYING') return;
-      if (player.activeBombs >= player.maxBombs) return;
-
-      const bx = Math.round(player.x);
-      const by = Math.round(player.y);
-
-      // Não colocar duas bombas na mesma casa
-      if (bombs.some(b => b.x === bx && b.y === by)) return;
-
-      initAudio();
-      playSound('bomb');
-
-      bombs.push({
-        x: bx,
-        y: by,
-        createdAt: Date.now()
-      });
-      player.activeBombs++;
-    }
-
-    function explodeBomb(bomb) {
-      playSound('explode');
-      const expTiles = [{ x: bomb.x, y: bomb.y }];
-      const dirs = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
-
-      dirs.forEach(d => {
-        for (let i = 1; i <= player.fireRange; i++) {
-          let tx = bomb.x + d.x * i;
-          let ty = bomb.y + d.y * i;
-
-          if (tx < 0 || tx >= GRID_SIZE || ty < 0 || ty >= GRID_SIZE) break;
-
-          let tile = map[ty][tx];
-          if (tile === T_HARD) break;
-
-          expTiles.push({ x: tx, y: ty });
-
-          if (tile === T_SOFT || tile === T_EXIT) {
-            map[ty][tx] = T_EMPTY; // Destrói bloco macio
-            break;
-          }
-        }
-      });
-
-      explosions.push({
-        tiles: expTiles,
-        createdAt: Date.now()
-      });
-    }
-
-    function playerHit() {
-      lives--;
-      updateHUD();
-      if (lives <= 0) {
-        gameState = 'GAMEOVER';
-        showOverlay('GAME OVER', `Você chegou até a Fase ${stage}`);
-      } else {
-        player.x = 1;
-        player.y = 1;
-      }
-    }
-
-    function stageClear() {
-      gameState = 'STAGE_CLEAR';
-      if (stage > maxUnlockedStage) {
-        maxUnlockedStage = Math.min(stage + 1, TOTAL_STAGES);
-        localStorage.setItem('bm5_unlocked_stage', maxUnlockedStage);
+        blowUpBomb(nextBomb);
       }
 
-      if (stage >= TOTAL_STAGES) {
-        showOverlay('🏆 VOCÊ ZEROU O JOGO!', 'Parabéns! Você venceu as 300 Fases!');
-      } else {
-        stage++;
-        showOverlay(`FASE ${stage - 1} CONCLUÍDA!`, `Avançando para a Fase ${stage}...`);
-        setTimeout(() => {
-          startGame(stage);
-        }, 1500);
+      // stop the explosion if hit anything
+      if (cell) {
+        return;
       }
     }
+  });
+}
 
-    /* ===================================================
-       5. RENDERIZAÇÃO GRÁFICA NO CANVAS
-       =================================================== */
-    function render() {
-      // Limpar Tela
-      ctx.fillStyle = '#111827';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+// bomb constructor function
+function Bomb(row, col, size, owner) {
+  this.row = row;
+  this.col = col;
+  this.radius = grid * 0.4;
+  this.size = size;    // the size of the explosion
+  this.owner = owner;  // which player placed this bomb
+  this.alive = true;
+  this.type = types.bomb;
 
-      // Renderizar Mapa
-      for (let r = 0; r < GRID_SIZE; r++) {
-        for (let c = 0; c < GRID_SIZE; c++) {
-          const tile = map[r][c];
-          const px = c * TILE_SIZE;
-          const py = r * TILE_SIZE;
+  // bomb blows up after 3 seconds
+  this.timer = 3000;
 
-          if (tile === T_HARD) {
-            ctx.fillStyle = '#374151';
-            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-            ctx.strokeStyle = '#1f2937';
-            ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
-          } else if (tile === T_SOFT) {
-            ctx.fillStyle = '#d97706';
-            ctx.fillRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2);
-            ctx.strokeStyle = '#b45309';
-            ctx.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2);
-          } else {
-            ctx.fillStyle = '#10b981'; // Chão verde
-            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-            ctx.strokeStyle = '#059669';
-            ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
-          }
-        }
+  // update the bomb each frame
+  this.update = function(dt) {
+    this.timer -= dt;
+
+    // blow up bomb if timer is done
+    if (this.timer <= 0) {
+      return blowUpBomb(this);
+    }
+
+    // change the size of the bomb every half second. we can determine the size
+    // by dividing by 500 (half a second) and taking the ceiling of the result.
+    // then we can check if the result is even or odd and change the size
+    const interval = Math.ceil(this.timer / 500);
+    if (interval % 2 === 0) {
+      this.radius = grid * 0.4;
+    }
+    else {
+      this.radius = grid * 0.5;
+    }
+  };
+
+  // render the bomb each frame
+  this.render = function() {
+    const x = (this.col + 0.5) * grid;
+    const y = (this.row + 0.5) * grid;
+
+    // draw bomb
+    context.fillStyle = 'black';
+    context.beginPath();
+    context.arc(x, y, this.radius, 0, 2 * Math.PI);
+    context.fill();
+
+    // draw bomb fuse moving up and down with the bomb size
+    const fuseY = (this.radius === grid * 0.5 ? grid * 0.15 : 0);
+    context.strokeStyle = 'white';
+    context.lineWidth = 5;
+    context.beginPath();
+    context.arc(
+      (this.col + 0.75) * grid,
+      (this.row + 0.25) * grid - fuseY,
+      10, Math.PI, -Math.PI / 2
+    );
+    context.stroke();
+  };
+}
+
+// explosion constructor function
+function Explosion(row, col, dir, center) {
+  this.row = row;
+  this.col = col;
+  this.dir = dir;
+  this.alive = true;
+
+  // show explosion for 0.3 seconds
+  this.timer = 300;
+
+  // update the explosion each frame
+  this.update = function(dt) {
+    this.timer -= dt;
+
+    if (this.timer <=0) {
+      this.alive = false;
+    }
+  };
+
+  // render the explosion each frame
+  this.render = function() {
+    const x = this.col * grid;
+    const y = this.row * grid;
+    const horizontal = this.dir.col;
+    const vertical = this.dir.row;
+
+    // create a fire effect by stacking red, orange, and yellow on top of
+    // each other using progressively smaller rectangles
+    context.fillStyle = '#D72B16';  // red
+    context.fillRect(x, y, grid, grid);
+
+    context.fillStyle = '#F39642';  // orange
+
+    // determine how to draw based on if it's vertical or horizontal
+    // center draws both ways
+    if (center || horizontal) {
+      context.fillRect(x, y + 6, grid, grid - 12);
+    }
+    if (center || vertical) {
+      context.fillRect(x + 6, y, grid - 12, grid);
+    }
+
+    context.fillStyle = '#FFE5A8';  // yellow
+
+    if (center || horizontal) {
+      context.fillRect(x, y + 12, grid, grid - 24);
+    }
+    if (center || vertical) {
+      context.fillRect(x + 12, y, grid - 24, grid);
+    }
+  };
+}
+
+// player character (just a simple circle)
+const player = {
+  row: 1,
+  col: 1,
+  numBombs: 1,
+  bombSize: 3,
+  radius: grid * 0.35,
+  render() {
+    const x = (this.col + 0.5) * grid;
+    const y = (this.row + 0.5) * grid;
+
+    context.save();
+    context.fillStyle = 'white';
+    context.beginPath();
+    context.arc(x, y, this.radius, 0, 2 * Math.PI);
+    context.fill();
+  }
+}
+
+// game loop
+let last;
+let dt;
+function loop(timestamp) {
+  requestAnimationFrame(loop);
+  context.clearRect(0,0,canvas.width,canvas.height);
+
+  // calculate the time difference since the last update. requestAnimationFrame
+  // passes the current timestamp as a parameter to the loop
+  if (!last) {
+    last = timestamp;
+  }
+  dt = timestamp - last;
+  last = timestamp;
+
+  // update and render everything in the grid
+  for (let row = 0; row < numRows; row++) {
+    for (let col = 0; col < numCols; col++) {
+      switch(cells[row][col]) {
+        case types.wall:
+          context.drawImage(wallCanvas, col * grid, row * grid);
+          break;
+        case types.softWall:
+          context.drawImage(softWallCanvas, col * grid, row * grid);
+          break;
       }
-
-      // Renderizar Bombas (Preto/Vermelho Pulsante)
-      bombs.forEach(b => {
-        ctx.fillStyle = (Math.floor(Date.now() / 200) % 2 === 0) ? '#111827' : '#dc2626';
-        ctx.beginPath();
-        ctx.arc((b.x + 0.5) * TILE_SIZE, (b.y + 0.5) * TILE_SIZE, TILE_SIZE * 0.4, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // Renderizar Explosões (Laranja/Amarelo)
-      explosions.forEach(exp => {
-        exp.tiles.forEach(t => {
-          ctx.fillStyle = '#f59e0b';
-          ctx.fillRect(t.x * TILE_SIZE, t.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-        });
-      });
-
-      // Renderizar Inimigos (Roxos/Vermelhos)
-      enemies.forEach(en => {
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc((en.x + 0.5) * TILE_SIZE, (en.y + 0.5) * TILE_SIZE, TILE_SIZE * 0.38, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // Renderizar Jogador (Bomberman Azul/Branco)
-      ctx.fillStyle = '#3b82f6';
-      ctx.beginPath();
-      ctx.arc((player.x + 0.5) * TILE_SIZE, (player.y + 0.5) * TILE_SIZE, TILE_SIZE * 0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect((player.x + 0.3) * TILE_SIZE, (player.y + 0.3) * TILE_SIZE, TILE_SIZE * 0.4, TILE_SIZE * 0.2);
     }
+  }
 
-    /* ===================================================
-       6. INTERFACE E CONTROLES
-       =================================================== */
-    function updateHUD() {
-      document.getElementById('hud-stage').textContent = stage;
-      document.getElementById('hud-lives').textContent = `❤️ ${lives}`;
-      document.getElementById('hud-bombs').textContent = `💣 ${player.maxBombs}`;
-    }
+  // update and render all entities
+  entities.forEach((entity) => {
+    entity.update(dt);
+    entity.render();
+  });
 
-    function showOverlay(title, sub) {
-      document.getElementById('ov-title').textContent = title;
-      document.getElementById('ov-sub').textContent = sub;
-      document.getElementById('stage-select-box').classList.remove('hidden');
-      document.getElementById('overlay').classList.remove('hidden');
-    }
+  // remove dead entities
+  entities = entities.filter((entity) => entity.alive);
 
-    function startGame(customStage) {
-      initAudio();
-      if (customStage) {
-        stage = customStage;
-      } else {
-        const inputVal = parseInt(document.getElementById('stageInput').value);
-        stage = Math.max(1, Math.min(inputVal || 1, maxUnlockedStage));
-      }
+  player.render();
+}
 
-      lives = 3;
-      player.maxBombs = 1;
-      player.fireRange = 1;
+// listen to keyboard events to move the snake
+document.addEventListener('keydown', function(e) {
+  let row = player.row;
+  let col = player.col;
 
-      generateStage(stage);
-      updateHUD();
+  // left arrow key
+  if (e.which === 37) {
+    col--;
+  }
+  // up arrow key
+  else if (e.which === 38) {
+    row--;
+  }
+  // right arrow key
+  else if (e.which === 39) {
+    col++;
+  }
+  // down arrow key
+  else if (e.which === 40) {
+    row++;
+  }
+  // space key (bomb)
+  else if (
+    e.which === 32 && !cells[row][col] &&
+    // count the number of bombs the player has placed
+    entities.filter((entity) => {
+      return entity.type === types.bomb && entity.owner === player
+    }).length < player.numBombs
+  ) {
+    // place bomb
+    const bomb = new Bomb(row, col, player.bombSize, player);
+    entities.push(bomb);
+    cells[row][col] = types.bomb;
+  }
 
-      document.getElementById('overlay').classList.add('hidden');
-      gameState = 'PLAYING';
+  // don't move the player if something is already at that position
+  if (!cells[row][col]) {
+    player.row = row;
+    player.col = col;
+  }
+});
 
-      if (!gameLoopId) {
-        gameLoop();
-      }
-    }
-
-    function gameLoop() {
-      update();
-      render();
-      gameLoopId = requestAnimationFrame(gameLoop);
-    }
-
-    // EVENTOS DE TECLADO
-    window.addEventListener('keydown', e => {
-      if (e.key === 'ArrowUp' || e.key === 'w') player.moving.up = true;
-      if (e.key === 'ArrowDown' || e.key === 's') player.moving.down = true;
-      if (e.key === 'ArrowLeft' || e.key === 'a') player.moving.left = true;
-      if (e.key === 'ArrowRight' || e.key === 'd') player.moving.right = true;
-      if (e.key === ' ' || e.key === 'Enter') dropBomb();
-    });
-
-    window.addEventListener('keyup', e => {
-      if (e.key === 'ArrowUp' || e.key === 'w') player.moving.up = false;
-      if (e.key === 'ArrowDown' || e.key === 's') player.moving.down = false;
-      if (e.key === 'ArrowLeft' || e.key === 'a') player.moving.left = false;
-      if (e.key === 'ArrowRight' || e.key === 'd') player.moving.right = false;
-    });
-
-    // CONTROLES TOUCH PAINEL
-    function bindTouch(id, action) {
-      const btn = document.getElementById(id);
-      btn.addEventListener('touchstart', e => {
-        e.preventDefault();
-        action(true);
-      });
-      btn.addEventListener('touchend', e => {
-        e.preventDefault();
-        action(false);
-      });
-      btn.addEventListener('mousedown', () => action(true));
-      btn.addEventListener('mouseup', () => action(false));
-    }
-
-    bindTouch('btn-up', val => player.moving.up = val);
-    bindTouch('btn-down', val => player.moving.down = val);
-    bindTouch('btn-left', val => player.moving.left = val);
-    bindTouch('btn-right', val => player.moving.right = val);
-
-    document.getElementById('btn-bomb').addEventListener('touchstart', e => {
-      e.preventDefault();
-      dropBomb();
-    });
-    document.getElementById('btn-bomb').addEventListener('click', dropBomb);
-
-    // INICIALIZAÇÃO
-    window.addEventListener('load', () => {
-      const savedStage = localStorage.getItem('bm5_unlocked_stage');
-      if (savedStage) {
-        maxUnlockedStage = parseInt(savedStage);
-        document.getElementById('stageInput').value = maxUnlockedStage;
-        document.getElementById('stageInput').max = maxUnlockedStage;
-      }
-      render(); // Primeira renderização garantida da tela
-    });
-  </script>
+// start the game
+generateLevel();
+requestAnimationFrame(loop);
+</script>
 </body>
 </html>
